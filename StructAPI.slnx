@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../Tester/Tester.csproj" Id="8cb342ca-d131-40dd-92cb-8e551e189e2f" />
+  <Project Path="StructAPI.csproj" />
+</Solution>
