@@ -1,25 +1,44 @@
 using StructAPI.Repository;
 using StructAPI.Service.IA;
-using StructAPI.Tests;
+using StructAPI.Service.Knowledge;
+using StructAPI.Service.Suggestions.Analysis;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddScoped<IKnowledgeEntryRepository, InMemoryKnowledgeEntryRepository>();
+//builder.Services.AddScoped<
+//    IKnowledgeEntryRepository,
+//    InMemoryKnowledgeEntryRepository>();
+
+builder.Services.AddSingleton<
+    IKnowledgeEntryRepository,
+    InMemoryKnowledgeEntryRepository>();
+
 builder.Services.AddScoped<
     ISemanticSimilarityService,
     SemanticSimilarityService>();
 
+builder.Services.AddScoped<
+    ISemanticAnalyzer,
+    SemanticAnalyzer>();
+
+builder.Services.AddScoped<SemanticMatchService>();
+
+builder.Services.AddScoped<KnowledgeEntryService>();
+
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

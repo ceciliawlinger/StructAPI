@@ -8,14 +8,11 @@
 
         public bool CorrectsPrevious = false; //TODO: LLM logic => ISemanticReasoningService
 
-        public bool ReplacesPrevious =>
-        SimilarityScore >= 0.70;
+        public bool ReplacesPrevious => SimilarityScore >= 0.70 && SimilarityScore < 0.90;
 
-        public bool AddsInformation =>
-        SimilarityScore >= 0.50;
+        public bool AddsInformation => SimilarityScore >= 0.50 &&SimilarityScore < 0.70;
 
-        public bool IsRedundant
-        => SimilarityScore >= 0.90;
+        public bool IsRedundant => SimilarityScore >= 0.90;
 
         public SemanticAnalysis(double similarityScore)
         {

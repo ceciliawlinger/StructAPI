@@ -3,34 +3,34 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace StructAPI.Service.IA
 {
-    public class SemanticSimilarityService : ISemanticSimilarityService 
+    public class SemanticSimilarityService : ISemanticSimilarityService
     {
-        private readonly string _apiKey;
-        private const string EmbeddingModel = "text-embedding-3-small";
+        private readonly string? _apiKey;
+        private readonly string? _embeddingModel;
 
         public SemanticSimilarityService(IConfiguration configuration)
         {
-            _apiKey = configuration["OpenAI:ApiKey"]
-                        ?? throw new InvalidOperationException(
-                            "OpenAI API key not configured.");
+            _apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+            if (string.IsNullOrEmpty(_apiKey))
+                    throw new InvalidOperationException("OpenAI API key is not set in environment variables.");
+
+            _embeddingModel = configuration["OpenAI:EmbeddingModel"];
+            if (string.IsNullOrEmpty(_embeddingModel))
+                throw new InvalidOperationException("Embedding model is not set in configuration.");
         }
 
-        public Task<double> CalculateSimilarityAsync(string source, string target)
+        public double CalculateSimilarityAsync(float[] source, float[] target)
         {
-            if (string.IsNullOrWhiteSpace(source))
+            if (source == null || source.Length == 0)
                 throw new ArgumentNullException("source");
 
-            if (string.IsNullOrWhiteSpace(target))
+            if (target == null || target.Length == 0)
                 throw new ArgumentNullException("target");
 
-            var sourceEmbedding = GenerateEmbeddingAsync(source);
-            var targetEmbedding = GenerateEmbeddingAsync(target);
-            return CalculateSemanticSimilarity(
-                sourceEmbedding.Result,
-                targetEmbedding.Result);
+            return CalculateSemanticSimilarity(source, target);
         }
 
-        private async Task<double> CalculateSemanticSimilarity(float[] sourceVector, float[] targetVector)
+        private double CalculateSemanticSimilarity(float[] sourceVector, float[] targetVector)
         {
             double product = 0.0;
             double sourceMagnitude = 0.0;
@@ -52,13 +52,13 @@ namespace StructAPI.Service.IA
             return product / (sourceMagnitude * targetMagnitude);
         }
 
-        private async Task<float[]> GenerateEmbeddingAsync(string content)
+        public async Task<float[]> GenerateEmbeddingAsync(string content)
         {
             if (string.IsNullOrEmpty(content))
                 throw new ArgumentNullException(nameof(content));
 
             var client = new OpenAIClient(_apiKey);
-            var embeddingClient = client.GetEmbeddingClient(EmbeddingModel);
+            var embeddingClient = client.GetEmbeddingClient(_embeddingModel);
             var response = await embeddingClient
                             .GenerateEmbeddingAsync(content);
 

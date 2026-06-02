@@ -12,6 +12,8 @@ namespace StructAPI.Domain
         public string  User { get; private set; }
         public int ReplacesEntryId { get; private set; }
 
+        public string Embedding { get; private set; } = string.Empty;
+
         public KnowledgeEntry(string content, string user)
         {
             ValidateContent(content);
@@ -19,6 +21,14 @@ namespace StructAPI.Domain
             this.Content = content;
             this.User = user;
             this.Status = EntryStatus.Active;
+            this.CreatedAt = DateTimeOffset.UtcNow;
+        }
+
+        public void SetEmbedding(string embedding)
+        {
+            if (string.IsNullOrWhiteSpace(embedding))
+                throw new DomainException("Embedding cannot be null or empty.");
+            this.Embedding = embedding;
         }
 
         public static KnowledgeEntry CreateReplacement(string content, string user, int replacesEntryId)

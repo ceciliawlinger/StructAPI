@@ -1,4 +1,6 @@
-﻿using StructAPI.Domain;
+﻿using System.Text.Json;
+using OpenAI;
+using StructAPI.Domain;
 using StructAPI.Domain.Dtos;
 using StructAPI.Service.IA;
 
@@ -18,12 +20,16 @@ namespace StructAPI.Service.Suggestions.Analysis
             if (string.IsNullOrEmpty(content))
                 throw new ArgumentNullException(nameof(content));
 
-            if(target == null) throw new ArgumentNullException(nameof(target));
+            if (target == null) throw new ArgumentNullException(nameof(target));
 
-            var similarity = await _similarityService
+            var sourceEmbedding = await _similarityService.GenerateEmbeddingAsync(content);
+
+            var targetEmbedding = JsonSerializer.Deserialize<float[]>(target.Embedding);
+
+            var similarity = _similarityService
             .CalculateSimilarityAsync(
-                content,
-                target.Content);
+                sourceEmbedding,
+                targetEmbedding);
 
             return new SemanticAnalysis(similarity);
         }

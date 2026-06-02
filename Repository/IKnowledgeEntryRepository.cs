@@ -7,7 +7,6 @@ namespace StructAPI.Repository
     public interface IKnowledgeEntryRepository
     {
         Task<KnowledgeEntry> CreateAsync(KnowledgeEntry entry);
-        Task<KnowledgeEntry> ReplaceAsync(int entryId, string newContent, string user);
         Task<KnowledgeEntry> UpdateAsync(KnowledgeEntry entry);
         Task DeleteAsync(KnowledgeEntry entry);
         Task<KnowledgeEntry?> GetByIdAsync(int id);

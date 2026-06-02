@@ -30,7 +30,8 @@ namespace StructAPI.Service.Suggestions.Analysis
 
             var results = new List<SemanticMatch>();
             foreach (var candidate in candidates
-                .Where(x => x.Status == EntryStatus.Active))
+                .Where(x => x.Status == EntryStatus.Active)
+                )
             {
                 var analysis = await _analyzer
                     .AnalyzeAsync(content, candidate);
