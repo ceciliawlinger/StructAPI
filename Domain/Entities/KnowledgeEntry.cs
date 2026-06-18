@@ -1,42 +1,50 @@
 ﻿using StructAPI.Domain.Enums;
 using StructAPI.Domain.Exceptions;
 
-namespace StructAPI.Domain
+namespace StructAPI.Domain.Entities
 {
     public class KnowledgeEntry
     {
-        public int Id { get; private set; }
+        public Guid Id { get; private set; }
         public string Content { get; private set; }
         public EntryStatus Status { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
         public string  User { get; private set; }
-        public int ReplacesEntryId { get; private set; }
+        public Guid? ReplacesEntryId { get; private set; }
 
-        public string Embedding { get; private set; } = string.Empty;
+        public float[] Embedding { get; private set; } = Array.Empty<float>();
 
-        public KnowledgeEntry(string content, string user)
+        public KnowledgeEntry(string content, string user, float[] embedding)
         {
             ValidateContent(content);
+            ValidateUser(user);
+            ValidateEmbedding(embedding);
 
+            this.Id = Guid.NewGuid();
             this.Content = content;
             this.User = user;
             this.Status = EntryStatus.Active;
             this.CreatedAt = DateTimeOffset.UtcNow;
         }
 
-        public void SetEmbedding(string embedding)
+        private void ValidateEmbedding(float[] embedding)
         {
-            if (string.IsNullOrWhiteSpace(embedding))
+            if (embedding == null || embedding.Length == 0)
                 throw new DomainException("Embedding cannot be null or empty.");
-            this.Embedding = embedding;
         }
 
-        public static KnowledgeEntry CreateReplacement(string content, string user, int replacesEntryId)
+        private void ValidateUser(string user)
         {
-            if (replacesEntryId <= 0)
+            if (string.IsNullOrEmpty(user)) 
+                throw new ArgumentNullException(nameof(user));
+        }
+
+        public static KnowledgeEntry CreateReplacement(string content, string user, Guid replacesEntryId, float[] embedding)
+        {
+            if (replacesEntryId == Guid.Empty)
                 throw new DomainException("ReplacesEntryId is invalid.");
 
-            return new KnowledgeEntry(content, user)
+            return new KnowledgeEntry(content, user, embedding)
             {
                 ReplacesEntryId = replacesEntryId
             };
@@ -67,9 +75,9 @@ namespace StructAPI.Domain
             );
         }
 
-        public void SetID(int id)
+        public void SetID(Guid id)
         {
-            if (id <= 0) throw new DomainException("Id must be greater than zero.");
+            if (id == Guid.Empty) throw new DomainException("Id must be a valid GUID.");
             this.Id = id;
         }
     }

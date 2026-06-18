@@ -1,5 +1,5 @@
-﻿using StructAPI.Domain;
-using StructAPI.Domain.Dtos;
+﻿using StructAPI.Application.Dtos;
+using StructAPI.Domain.Entities;
 
 namespace StructAPI.Service.Suggestions.Analysis
 {

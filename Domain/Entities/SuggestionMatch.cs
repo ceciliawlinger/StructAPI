@@ -1,7 +1,7 @@
-﻿using StructAPI.Domain.Dtos;
+﻿using StructAPI.Application.Dtos;
 using StructAPI.Domain.Enums;
 
-namespace StructAPI.Domain
+namespace StructAPI.Domain.Entities
 {
     public class SuggestionMatch
     {

@@ -2,11 +2,11 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using StructAPI.Domain;
-using StructAPI.Domain.Dtos;
+using StructAPI.Application.Dtos;
+using StructAPI.Application.Interfaces;
+using StructAPI.Domain.Entities;
 using StructAPI.Domain.Enums;
 using StructAPI.Domain.Exceptions;
-using StructAPI.Repository;
 using StructAPI.Service.IA;
 using StructAPI.Service.Suggestions.Analysis;
 
@@ -36,15 +36,18 @@ namespace StructAPI.Service.Knowledge
         }
         public async Task<KnowledgeEntryResponse> CreateKnowledgeEntry(CreateKnowledgeEntryRequest request) 
         {
-            KnowledgeEntry entry = new KnowledgeEntry(request.Content, request.User);
+            if (string.IsNullOrWhiteSpace(request.Content))
+                throw new DomainException("Content cannot be empty.");
+
+            var embedding = await _similarityService.GenerateEmbeddingAsync(request.Content);
+            KnowledgeEntry entry = new KnowledgeEntry(request.Content, request.User, embedding);
             var matches = await _matchService.FindMatchesAsync(request.Content);
 
             if (matches.Any(x => x.Analysis.IsRedundant))
                 throw new DuplicateKnowledgeEntryException();
 
             await _repository.CreateAsync(entry);
-            var embedding = await _similarityService.GenerateEmbeddingAsync(request.Content);
-            entry.SetEmbedding(JsonSerializer.Serialize(embedding));
+
             return new KnowledgeEntryResponse(entry);
         }
 
@@ -60,25 +63,25 @@ namespace StructAPI.Service.Knowledge
                 throw new DuplicateKnowledgeEntryException();
 
             matches = matches.Where(x => x.Entry.Id != request.OldEntryID).ToList();
+            
+            var embedding = await _similarityService.GenerateEmbeddingAsync(request.Content);
 
             var newEntry = KnowledgeEntry.CreateReplacement( // Always create a new one and deprecate the old one.
                  request.Content,
                  request.User,
-                 request.OldEntryID
+                 request.OldEntryID,
+                 embedding
              );
 
             var log = existingEntry.Deprecate("Replaced by new entry", request.User);
             await _repository.CreateAsync(newEntry);
-            await _repository.UpdateAsync(existingEntry);
+            await _repository.UpdateStatusAsync(existingEntry);
             return new KnowledgeEntryResponse(newEntry);
         }
             
-        public async Task DeleteKnowledgeEntry(int entryId) 
+        public async Task DeleteKnowledgeEntry(Guid entryId) 
         {
-            var existingEntry = await _repository.GetByIdAsync(entryId);
-            if (existingEntry == null)
-                throw new DomainException("Entry not found.");
-            await _repository.DeleteAsync(existingEntry);
+            await _repository.DeleteAsync(entryId);
         }
     }
 }

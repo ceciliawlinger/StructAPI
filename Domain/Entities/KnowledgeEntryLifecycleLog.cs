@@ -3,11 +3,11 @@ using System.Reflection.Metadata;
 using StructAPI.Domain.Enums;
 using StructAPI.Domain.Exceptions;
 
-namespace StructAPI.Domain
+namespace StructAPI.Domain.Entities
 {
     public class KnowledgeEntryLifecycleLog
     {
-        public int KnowledgeEntryId { get; private set; }
+        public Guid KnowledgeEntryId { get; private set; }
         public EntryStatus OldStatus { get; private set; }
         public EntryStatus NewStatus { get; private set; }
         public string Reason { get; private set; } = string.Empty;
@@ -15,7 +15,7 @@ namespace StructAPI.Domain
         public string User { get; private set; } = string.Empty;
         
 
-        public KnowledgeEntryLifecycleLog(int knowledgeEntryId, EntryStatus oldStatus, EntryStatus newStatus, string reason, string user)
+        public KnowledgeEntryLifecycleLog(Guid knowledgeEntryId, EntryStatus oldStatus, EntryStatus newStatus, string reason, string user)
         {
             if (string.IsNullOrWhiteSpace(reason))
                 throw new DomainException("Reason cannot be empty");
@@ -23,8 +23,8 @@ namespace StructAPI.Domain
             if (string.IsNullOrWhiteSpace(user))
                 throw new DomainException("User cannot be empty");
 
-            if (knowledgeEntryId <= 0)
-                throw new DomainException("Knowledge entry ID must be positive");
+            if (knowledgeEntryId == Guid.Empty)
+                throw new DomainException("Knowledge entry ID must be a valid GUID.");
 
             if (oldStatus == newStatus)
                 throw new DomainException("Old status and new status cannot be the same");

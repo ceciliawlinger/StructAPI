@@ -1,4 +1,7 @@
-using StructAPI.Repository;
+using Microsoft.EntityFrameworkCore;
+using StructAPI.Application.Interfaces;
+using StructAPI.Infrastructure.Persistence;
+using StructAPI.Infrastructure.Persistence.Repositories;
 using StructAPI.Service.IA;
 using StructAPI.Service.Knowledge;
 using StructAPI.Service.Suggestions.Analysis;
@@ -6,13 +9,10 @@ using StructAPI.Service.Suggestions.Analysis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//builder.Services.AddScoped<
-//    IKnowledgeEntryRepository,
-//    InMemoryKnowledgeEntryRepository>();
 
-builder.Services.AddSingleton<
+builder.Services.AddScoped<
     IKnowledgeEntryRepository,
-    InMemoryKnowledgeEntryRepository>();
+    KnowledgeEntryRepository>();
 
 builder.Services.AddScoped<
     ISemanticSimilarityService,
@@ -21,6 +21,13 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     ISemanticAnalyzer,
     SemanticAnalyzer>();
+
+builder.Services.AddScoped<
+    IKnowledgeRelationRepository,
+    KnowledgeRelationRepository>();
+
+builder.Services.AddDbContext<KnowledgeDbContext>(options => 
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<SemanticMatchService>();
 

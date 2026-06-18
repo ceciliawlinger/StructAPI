@@ -1,10 +1,11 @@
-﻿using StructAPI.Domain.Enums;
+﻿using StructAPI.Domain.Entities;
+using StructAPI.Domain.Enums;
 
-namespace StructAPI.Domain.Dtos
+namespace StructAPI.Application.Dtos
 {
     public class KnowledgeEntryResponse
     {
-        public int Id { get; }
+        public Guid Id { get; }
 
         public string Content { get; }
 

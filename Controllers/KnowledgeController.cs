@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using StructAPI.Domain.Dtos;
+using StructAPI.Application.Dtos;
 using StructAPI.Service.Knowledge;
 
 namespace StructAPI.Controllers
@@ -34,7 +34,7 @@ namespace StructAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             await _service.DeleteKnowledgeEntry(id);
 

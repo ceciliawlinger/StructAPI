@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace StructAPI.Domain.Dtos
+namespace StructAPI.Application.Dtos
 {
     public class CreateKnowledgeEntryRequest
     {

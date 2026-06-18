@@ -19,7 +19,7 @@ namespace StructAPI.Service.IA
                 throw new InvalidOperationException("Embedding model is not set in configuration.");
         }
 
-        public double CalculateSimilarityAsync(float[] source, float[] target)
+        public double CalculateSimilarity(float[] source, float[] target)
         {
             if (source == null || source.Length == 0)
                 throw new ArgumentNullException("source");

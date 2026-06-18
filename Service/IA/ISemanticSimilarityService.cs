@@ -2,7 +2,7 @@
 {
     public interface ISemanticSimilarityService
     {
-        double CalculateSimilarityAsync(float[] source, float[] target);
+        double CalculateSimilarity(float[] source, float[] target);
 
         Task<float[]> GenerateEmbeddingAsync(string content);
     }

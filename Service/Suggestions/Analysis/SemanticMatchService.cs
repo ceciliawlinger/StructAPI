@@ -1,7 +1,7 @@
-﻿using StructAPI.Domain;
-using StructAPI.Domain.Dtos;
+﻿using StructAPI.Application.Dtos;
+using StructAPI.Application.Interfaces;
+using StructAPI.Domain;
 using StructAPI.Domain.Enums;
-using StructAPI.Repository;
 
 namespace StructAPI.Service.Suggestions.Analysis
 {

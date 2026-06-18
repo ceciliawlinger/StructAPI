@@ -1,4 +1,6 @@
-﻿namespace StructAPI.Domain.Dtos
+﻿using StructAPI.Domain.Entities;
+
+namespace StructAPI.Application.Dtos
 {
     public class SemanticMatch
     {

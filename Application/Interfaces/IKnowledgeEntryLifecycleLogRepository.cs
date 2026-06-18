@@ -1,6 +1,6 @@
-﻿using StructAPI.Domain;
+﻿using StructAPI.Domain.Entities;
 
-namespace StructAPI.Repository
+namespace StructAPI.Application.Interfaces
 {
     public interface IKnowledgeEntryLifecycleLogRepository
     {

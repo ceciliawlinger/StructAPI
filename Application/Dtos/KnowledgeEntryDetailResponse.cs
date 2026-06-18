@@ -1,6 +1,6 @@
 ﻿using StructAPI.Domain.Enums;
 
-namespace StructAPI.Domain.Dtos
+namespace StructAPI.Application.Dtos
 {
     public class KnowledgeEntryDetailResponse
     {
