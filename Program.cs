@@ -15,19 +15,17 @@ builder.Services.AddScoped<
     KnowledgeEntryRepository>();
 
 builder.Services.AddScoped<
-    ISemanticSimilarityService,
-    SemanticSimilarityService>();
-
-builder.Services.AddScoped<
-    ISemanticAnalyzer,
-    SemanticAnalyzer>();
+    IEmbeddingService,
+    OpenAIEmbeddingService>();
 
 builder.Services.AddScoped<
     IKnowledgeRelationRepository,
     KnowledgeRelationRepository>();
 
-builder.Services.AddDbContext<KnowledgeDbContext>(options => 
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<KnowledgeDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        o => o.UseVector()));
 
 builder.Services.AddScoped<SemanticMatchService>();
 

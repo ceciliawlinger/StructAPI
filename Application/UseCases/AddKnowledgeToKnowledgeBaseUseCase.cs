@@ -9,18 +9,18 @@ namespace StructAPI.Application.UseCases
     public class AddKnowledgeToKnowledgeBaseUseCase
     {
         private readonly IKnowledgeEntryRepository _repository;
-        private readonly ISemanticSimilarityService _semanticSimilarityService;
+        private readonly IEmbeddingService _embeddingService;
         private readonly SemanticMatchService _semanticMatchService;
         private readonly IKnowledgeRelationRepository _knowledgeRelationRepository;
 
         public AddKnowledgeToKnowledgeBaseUseCase(
             IKnowledgeEntryRepository repository,
-            ISemanticSimilarityService semanticSimilarityService,
+            IEmbeddingService embeddingService,
             SemanticMatchService semanticMatchService,
             IKnowledgeRelationRepository knowledgeRelationRepository)
         {
             _repository = repository;
-            _semanticSimilarityService = semanticSimilarityService;
+            _embeddingService = embeddingService;
             _semanticMatchService = semanticMatchService;
             _knowledgeRelationRepository = knowledgeRelationRepository;
         }
@@ -30,12 +30,11 @@ namespace StructAPI.Application.UseCases
             ArgumentException.ThrowIfNullOrWhiteSpace(content, nameof(content));
             ArgumentException.ThrowIfNullOrWhiteSpace(user, nameof(user));
 
-            var embedding = await _semanticSimilarityService.GenerateEmbeddingAsync(content);
-            if (embedding == null || embedding.Length == 0)
-                throw new Exception("Failed to generate embedding for the provided content.");
+            var embedding = await _embeddingService.GenerateEmbeddingAsync(content);
+            if (embedding == null) 
+                throw new InvalidOperationException("Failed to generate embedding for the provided content.");
 
-            var matches = await _semanticMatchService.FindMatchesAsync(content);
-
+            var matches = await _semanticMatchService.FindSemanticMatchesAsync(embedding);
             var entry = new KnowledgeEntry(content, user, embedding);
             await _repository.CreateAsync(entry);
 

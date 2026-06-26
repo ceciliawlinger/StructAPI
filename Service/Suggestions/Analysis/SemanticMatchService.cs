@@ -1,48 +1,32 @@
-﻿using StructAPI.Application.Dtos;
+﻿using Pgvector;
+using StructAPI.Application.Dtos;
 using StructAPI.Application.Interfaces;
-using StructAPI.Domain;
-using StructAPI.Domain.Enums;
+using StructAPI.Service.IA;
 
 namespace StructAPI.Service.Suggestions.Analysis
 {
     public class SemanticMatchService
     {
         private readonly IKnowledgeEntryRepository _repository;
-        private readonly ISemanticAnalyzer _analyzer;
+        private readonly IEmbeddingService _embeddingService;
+        private readonly IKnowledgeEntryRepository _knowledgeEntryRepository;
 
-        public SemanticMatchService(
-            IKnowledgeEntryRepository repository,
-            ISemanticAnalyzer analyzer)
+        public SemanticMatchService(IKnowledgeEntryRepository repository, IEmbeddingService embeddingService, IKnowledgeEntryRepository knowledgeEntryRepository)
         {
             _repository = repository
                 ?? throw new ArgumentNullException(nameof(repository));
-
-            _analyzer = analyzer
-                ?? throw new ArgumentNullException(nameof(analyzer));
+            _embeddingService = embeddingService
+                ?? throw new ArgumentNullException(nameof(embeddingService));
+            _knowledgeEntryRepository = knowledgeEntryRepository
+                ?? throw new ArgumentNullException(nameof(knowledgeEntryRepository));
         }
 
-        public async Task<List<SemanticMatch>> FindMatchesAsync(string content)
+        public async Task<List<SemanticMatch>> FindSemanticMatchesAsync(Vector embedding, int top = 5)
         {
-            if (string.IsNullOrWhiteSpace(content))
+            if (embedding == null)
                 return new List<SemanticMatch>();
 
-            var candidates = await _repository.GetAllAsync();
-
-            var results = new List<SemanticMatch>();
-            foreach (var candidate in candidates
-                .Where(x => x.Status == EntryStatus.Active)
-                )
-            {
-                var analysis = await _analyzer
-                    .AnalyzeAsync(content, candidate);
-
-                results.Add(
-                    new SemanticMatch(
-                        candidate,
-                        analysis));
-            }
-
-            return results;
+            return await _knowledgeEntryRepository.FindSimilarAsync(embedding, top);
         }
     }
 }

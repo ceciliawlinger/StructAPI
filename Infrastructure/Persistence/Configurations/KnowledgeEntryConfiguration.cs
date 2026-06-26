@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using StructAPI.Domain.Entities;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Text.Json;
 
 namespace StructAPI.Infrastructure.Persistence.Configurations
@@ -17,10 +18,8 @@ namespace StructAPI.Infrastructure.Persistence.Configurations
             builder.Property(e => e.CreatedAt).IsRequired();
             builder.Property(e => e.Status).HasConversion<string>().IsRequired();
             builder.Property(e => e.Embedding)
-                    .HasConversion(
-                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                        v => JsonSerializer.Deserialize<float[]>(v, (JsonSerializerOptions)null)!)
-                    .IsRequired();
+                .HasColumnType("vector(1536)")
+                .IsRequired();
             builder.Property(e => e.ReplacesEntryId).IsRequired(false);
             builder.HasIndex(e => e.Status);
             builder.HasIndex(e => e.CreatedAt);

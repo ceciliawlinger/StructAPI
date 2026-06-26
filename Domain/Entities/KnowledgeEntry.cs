@@ -1,5 +1,6 @@
 ﻿using StructAPI.Domain.Enums;
 using StructAPI.Domain.Exceptions;
+using Pgvector;
 
 namespace StructAPI.Domain.Entities
 {
@@ -12,9 +13,9 @@ namespace StructAPI.Domain.Entities
         public string  User { get; private set; }
         public Guid? ReplacesEntryId { get; private set; }
 
-        public float[] Embedding { get; private set; } = Array.Empty<float>();
+        public Vector Embedding { get; private set; }
 
-        public KnowledgeEntry(string content, string user, float[] embedding)
+        public KnowledgeEntry(string content, string user, Vector embedding)
         {
             ValidateContent(content);
             ValidateUser(user);
@@ -25,12 +26,13 @@ namespace StructAPI.Domain.Entities
             this.User = user;
             this.Status = EntryStatus.Active;
             this.CreatedAt = DateTimeOffset.UtcNow;
+            this.Embedding = embedding;
         }
 
-        private void ValidateEmbedding(float[] embedding)
+        private void ValidateEmbedding(Vector embedding)
         {
-            if (embedding == null || embedding.Length == 0)
-                throw new DomainException("Embedding cannot be null or empty.");
+            if (embedding == null)
+                throw new DomainException("Embedding cannot be null.");
         }
 
         private void ValidateUser(string user)
@@ -39,7 +41,7 @@ namespace StructAPI.Domain.Entities
                 throw new ArgumentNullException(nameof(user));
         }
 
-        public static KnowledgeEntry CreateReplacement(string content, string user, Guid replacesEntryId, float[] embedding)
+        public static KnowledgeEntry CreateReplacement(string content, string user, Guid replacesEntryId, Vector embedding)
         {
             if (replacesEntryId == Guid.Empty)
                 throw new DomainException("ReplacesEntryId is invalid.");
@@ -48,6 +50,11 @@ namespace StructAPI.Domain.Entities
             {
                 ReplacesEntryId = replacesEntryId
             };
+        }
+
+        public void SetStatus(EntryStatus status)
+        {
+            this.Status = status;
         }
 
         private void ValidateContent(string content)

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StructAPI.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using StructAPI.Infrastructure.Persistence;
 namespace StructAPI.Migrations
 {
     [DbContext(typeof(KnowledgeDbContext))]
-    partial class KnowledgeDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260625230054_AddKnowledgeRelation")]
+    partial class AddKnowledgeRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

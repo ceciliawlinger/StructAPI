@@ -1,4 +1,6 @@
-﻿using StructAPI.Domain.Entities;
+﻿using Pgvector;
+using StructAPI.Application.Dtos;
+using StructAPI.Domain.Entities;
 using StructAPI.Domain.Enums;
 
 namespace StructAPI.Application.Interfaces
@@ -9,7 +11,7 @@ namespace StructAPI.Application.Interfaces
         Task UpdateStatusAsync(KnowledgeEntry entry);
         Task DeleteAsync(Guid id);
         Task<KnowledgeEntry?> GetByIdAsync(Guid id);
-        Task<List<KnowledgeEntry>> FindSimilarAsync(float[] embedding, int top);
+        Task<List<SemanticMatch>> FindSimilarAsync(Vector embedding, int top);
         Task<List<KnowledgeEntry>> GetAllAsync();
         Task<List<KnowledgeEntry>> GetByStatusAsync(EntryStatus status);
         Task<List<KnowledgeEntry>> GetActiveAsync();

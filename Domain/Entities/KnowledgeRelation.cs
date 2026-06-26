@@ -6,11 +6,16 @@ namespace StructAPI.Domain.Entities
     public class KnowledgeRelation
     {
         public Guid Id { get; private set; } 
-        public Guid SourceEntryId { get; }
-        public Guid RelatedEntryId { get; }
-        public KnowledgeRelationType RelationType { get; }
-        public double Confidence { get; }
+        public Guid SourceEntryId { get; private set; }
+        public Guid RelatedEntryId { get; private set; }
+        public KnowledgeRelationType RelationType { get; private set; }
+        public double Confidence { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
+
+        public KnowledgeRelation()
+        {
+            
+        }
 
         public KnowledgeRelation(Guid sourceEntryId, Guid relatedEntryId, KnowledgeRelationType relationType, double confidence)
         {
@@ -27,8 +32,11 @@ namespace StructAPI.Domain.Entities
             if (sourceEntryId == relatedEntryId)
                 throw new DomainException("Source entry ID and related entry ID cannot be the same.");
 
-            Confidence = confidence;
+            SourceEntryId = sourceEntryId;
+            RelatedEntryId = relatedEntryId;
             RelationType = relationType;
+            Confidence = confidence;
+            CreatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

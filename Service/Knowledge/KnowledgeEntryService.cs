@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Pgvector;
 using StructAPI.Application.Dtos;
 using StructAPI.Application.Interfaces;
 using StructAPI.Domain.Entities;
@@ -15,23 +16,19 @@ namespace StructAPI.Service.Knowledge
     public class KnowledgeEntryService
     {
         private readonly IKnowledgeEntryRepository _repository;
-        private readonly ISemanticAnalyzer _analyzer;
         private readonly SemanticMatchService _matchService;
-        private readonly ISemanticSimilarityService _similarityService;
+        private readonly IEmbeddingService _embeddingService;
 
-        public KnowledgeEntryService(IKnowledgeEntryRepository repository, ISemanticAnalyzer analyzer, SemanticMatchService matchService, ISemanticSimilarityService similarityService)
+        public KnowledgeEntryService(IKnowledgeEntryRepository repository, SemanticMatchService matchService, IEmbeddingService embeddingService)
         {
             if (repository == null) throw new ArgumentNullException("Repository cannot be null");
             _repository = repository;
 
-            if (analyzer == null) throw new ArgumentNullException("Analyzer cannot be null");
-            _analyzer = analyzer;
-
             if (matchService == null) throw new ArgumentNullException("Match service cannot be null");
             _matchService = matchService;
 
-            if (similarityService == null) throw new ArgumentNullException("Similarity service cannot be null");
-            _similarityService = similarityService;
+            if (embeddingService == null) throw new ArgumentNullException("Embedding service cannot be null");
+            _embeddingService = embeddingService;
 
         }
         public async Task<KnowledgeEntryResponse> CreateKnowledgeEntry(CreateKnowledgeEntryRequest request) 
@@ -39,9 +36,11 @@ namespace StructAPI.Service.Knowledge
             if (string.IsNullOrWhiteSpace(request.Content))
                 throw new DomainException("Content cannot be empty.");
 
-            var embedding = await _similarityService.GenerateEmbeddingAsync(request.Content);
+            var embedding = await _embeddingService.GenerateEmbeddingAsync(request.Content);
+            if (embedding == null)
+                throw new DomainException("Failed to generate embedding for the content.");
             KnowledgeEntry entry = new KnowledgeEntry(request.Content, request.User, embedding);
-            var matches = await _matchService.FindMatchesAsync(request.Content);
+            var matches = await _matchService.FindSemanticMatchesAsync(embedding);
 
             if (matches.Any(x => x.Analysis.IsRedundant))
                 throw new DuplicateKnowledgeEntryException();
@@ -57,15 +56,17 @@ namespace StructAPI.Service.Knowledge
             if (existingEntry == null)
                 throw new DomainException("Entry to be replaced not found.");
 
-            var matches = await _matchService.FindMatchesAsync(request.Content);
+            var embedding = await _embeddingService.GenerateEmbeddingAsync(request.Content);
+            if (embedding == null)
+                throw new DomainException("Failed to generate embedding for the content.");
+
+            var matches = await _matchService.FindSemanticMatchesAsync(embedding);
 
             if (matches.Any(x => x.Analysis.IsRedundant))
                 throw new DuplicateKnowledgeEntryException();
 
             matches = matches.Where(x => x.Entry.Id != request.OldEntryID).ToList();
             
-            var embedding = await _similarityService.GenerateEmbeddingAsync(request.Content);
-
             var newEntry = KnowledgeEntry.CreateReplacement( // Always create a new one and deprecate the old one.
                  request.Content,
                  request.User,
