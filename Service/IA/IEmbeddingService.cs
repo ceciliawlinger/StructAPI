@@ -4,6 +4,6 @@ namespace StructAPI.Service.IA
 {
     public interface IEmbeddingService
     {
-        Task<Vector> GenerateEmbeddingAsync(string content);
+        Task<float[]> GenerateEmbeddingAsync(string content);
     }
 }

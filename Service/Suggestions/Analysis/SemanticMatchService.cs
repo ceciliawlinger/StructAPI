@@ -21,7 +21,7 @@ namespace StructAPI.Service.Suggestions.Analysis
                 ?? throw new ArgumentNullException(nameof(knowledgeEntryRepository));
         }
 
-        public async Task<List<SemanticMatch>> FindSemanticMatchesAsync(Vector embedding, int top = 5)
+        public async Task<List<SemanticMatch>> FindSemanticMatchesAsync(float[] embedding, int top = 5)
         {
             if (embedding == null)
                 return new List<SemanticMatch>();

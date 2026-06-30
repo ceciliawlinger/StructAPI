@@ -11,7 +11,7 @@ namespace StructAPI.Application.Interfaces
         Task UpdateStatusAsync(KnowledgeEntry entry);
         Task DeleteAsync(Guid id);
         Task<KnowledgeEntry?> GetByIdAsync(Guid id);
-        Task<List<SemanticMatch>> FindSimilarAsync(Vector embedding, int top);
+        Task<List<SemanticMatch>> FindSimilarAsync(float[] embedding, int top);
         Task<List<KnowledgeEntry>> GetAllAsync();
         Task<List<KnowledgeEntry>> GetByStatusAsync(EntryStatus status);
         Task<List<KnowledgeEntry>> GetActiveAsync();

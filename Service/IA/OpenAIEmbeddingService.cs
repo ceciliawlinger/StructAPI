@@ -25,12 +25,12 @@ namespace StructAPI.Service.IA
             _embeddingClient = client.GetEmbeddingClient(_embeddingModel);
         }
 
-        public async Task<Vector> GenerateEmbeddingAsync(string content)
+        public async Task<float[]> GenerateEmbeddingAsync(string content)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(content);
 
             var response = await _embeddingClient.GenerateEmbeddingAsync(content);
-            return new Vector(response.Value.ToFloats().ToArray());
+            return response.Value.ToFloats().ToArray();
         }
     }
 }

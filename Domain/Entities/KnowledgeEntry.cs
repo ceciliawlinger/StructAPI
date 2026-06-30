@@ -15,7 +15,7 @@ namespace StructAPI.Domain.Entities
 
         public Vector Embedding { get; private set; }
 
-        public KnowledgeEntry(string content, string user, Vector embedding)
+        public KnowledgeEntry(string content, string user, float[] embedding)
         {
             ValidateContent(content);
             ValidateUser(user);
@@ -26,12 +26,12 @@ namespace StructAPI.Domain.Entities
             this.User = user;
             this.Status = EntryStatus.Active;
             this.CreatedAt = DateTimeOffset.UtcNow;
-            this.Embedding = embedding;
+            this.Embedding = new Vector(embedding);
         }
 
-        private void ValidateEmbedding(Vector embedding)
+        private void ValidateEmbedding(float[] embedding)
         {
-            if (embedding == null)
+            if (embedding == null || embedding.Length == 0)
                 throw new DomainException("Embedding cannot be null.");
         }
 
@@ -41,7 +41,7 @@ namespace StructAPI.Domain.Entities
                 throw new ArgumentNullException(nameof(user));
         }
 
-        public static KnowledgeEntry CreateReplacement(string content, string user, Guid replacesEntryId, Vector embedding)
+        public static KnowledgeEntry CreateReplacement(string content, string user, Guid replacesEntryId, float[] embedding)
         {
             if (replacesEntryId == Guid.Empty)
                 throw new DomainException("ReplacesEntryId is invalid.");

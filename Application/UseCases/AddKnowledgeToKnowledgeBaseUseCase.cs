@@ -1,4 +1,5 @@
-﻿using StructAPI.Application.Interfaces;
+﻿using Pgvector;
+using StructAPI.Application.Interfaces;
 using StructAPI.Domain.Entities;
 using StructAPI.Service.IA;
 using StructAPI.Service.Suggestions.Analysis;

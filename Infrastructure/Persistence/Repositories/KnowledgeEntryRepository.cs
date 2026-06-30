@@ -21,16 +21,25 @@ namespace StructAPI.Infrastructure.Persistence.Repositories
             _context = context;
             _embeddingService = embeddingService;
         }
-        public async Task<List<SemanticMatch>> FindSimilarAsync(Vector embedding, int top)
+        public async Task<List<SemanticMatch>> FindSimilarAsync(float[] embedding, int top)
         {
-            var entries = await _context.KnowledgeEntries
+            var vector = new Vector(embedding);
+
+            var matches = await _context.KnowledgeEntries
                 .Where(x => x.Status == EntryStatus.Active)
-                .OrderBy(x => x.Embedding.CosineDistance(embedding))
+                .Select(x => new
+                {
+                    Entry = x,
+                    Distance = x.Embedding.CosineDistance(vector)
+                })
+                .OrderBy(x => x.Distance)
                 .Take(top)
                 .ToListAsync();
 
-            return entries
-                .Select(e => new SemanticMatch(e, 0))
+            return matches
+                .Select(x => new SemanticMatch(
+                    x.Entry,
+                    1 - x.Distance))
                 .ToList();
         }
 
