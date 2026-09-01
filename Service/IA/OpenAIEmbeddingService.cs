@@ -1,6 +1,7 @@
 ﻿using OpenAI;
 using OpenAI.Embeddings;
 using Pgvector;
+using StructAPI.Application.Interfaces;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace StructAPI.Service.IA

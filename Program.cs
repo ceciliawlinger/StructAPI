@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using StructAPI.Application.Interfaces;
+using StructAPI.Domain.Services;
 using StructAPI.Infrastructure.Persistence;
 using StructAPI.Infrastructure.Persistence.Repositories;
 using StructAPI.Service.IA;
 using StructAPI.Service.Knowledge;
-using StructAPI.Service.Suggestions.Analysis;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,12 +22,12 @@ builder.Services.AddScoped<
     IKnowledgeRelationRepository,
     KnowledgeRelationRepository>();
 
+builder.Services.AddScoped<SemanticClassifier>();
+
 builder.Services.AddDbContext<KnowledgeDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         o => o.UseVector()));
-
-builder.Services.AddScoped<SemanticMatchService>();
 
 builder.Services.AddScoped<KnowledgeEntryService>();
 

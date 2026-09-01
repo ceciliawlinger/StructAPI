@@ -1,9 +1,7 @@
 ﻿using Pgvector;
 using StructAPI.Application.Interfaces;
 using StructAPI.Domain.Entities;
-using StructAPI.Service.IA;
-using StructAPI.Service.Suggestions.Analysis;
-using System.Linq;
+using StructAPI.Domain.Services;
 
 namespace StructAPI.Application.UseCases
 {
@@ -11,18 +9,18 @@ namespace StructAPI.Application.UseCases
     {
         private readonly IKnowledgeEntryRepository _repository;
         private readonly IEmbeddingService _embeddingService;
-        private readonly SemanticMatchService _semanticMatchService;
+        private readonly SemanticClassifier _classifier;
         private readonly IKnowledgeRelationRepository _knowledgeRelationRepository;
 
         public AddKnowledgeToKnowledgeBaseUseCase(
             IKnowledgeEntryRepository repository,
             IEmbeddingService embeddingService,
-            SemanticMatchService semanticMatchService,
+            SemanticClassifier classifier,
             IKnowledgeRelationRepository knowledgeRelationRepository)
         {
             _repository = repository;
             _embeddingService = embeddingService;
-            _semanticMatchService = semanticMatchService;
+            _classifier = classifier;
             _knowledgeRelationRepository = knowledgeRelationRepository;
         }
 
@@ -34,8 +32,7 @@ namespace StructAPI.Application.UseCases
             var embedding = await _embeddingService.GenerateEmbeddingAsync(content);
             if (embedding == null) 
                 throw new InvalidOperationException("Failed to generate embedding for the provided content.");
-
-            var matches = await _semanticMatchService.FindSemanticMatchesAsync(embedding);
+            var matches = await _repository.FindSimilarAsync(embedding, 5);
             var entry = new KnowledgeEntry(content, user, embedding);
             await _repository.CreateAsync(entry);
 
@@ -44,7 +41,8 @@ namespace StructAPI.Application.UseCases
 
             foreach (var match in matches)
             {
-                var relation = new KnowledgeRelation(entry.Id, match.Entry.Id, match.Analysis.RelationType, match.Analysis.SimilarityScore);
+                var relationType = _classifier.Classify(match.Similarity);
+                var relation = new KnowledgeRelation(entry.Id, match.Entry.Id, relationType, match.Similarity);
                 await _knowledgeRelationRepository.CreateAsync(relation);
             }
         }

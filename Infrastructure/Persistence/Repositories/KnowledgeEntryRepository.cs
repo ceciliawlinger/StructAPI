@@ -7,7 +7,6 @@ using StructAPI.Application.Interfaces;
 using StructAPI.Domain.Entities;
 using StructAPI.Domain.Enums;
 using StructAPI.Infrastructure.Persistence.Mappings;
-using StructAPI.Service.IA;
 
 namespace StructAPI.Infrastructure.Persistence.Repositories
 {

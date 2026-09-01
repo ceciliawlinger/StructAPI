@@ -6,7 +6,6 @@ namespace StructAPI.Application.Dtos
     {
         public KnowledgeEntry Entry { get; }
         public double Similarity { get; }
-        public SemanticAnalysis Analysis => new(Similarity);
 
         public SemanticMatch(KnowledgeEntry entry, double similarity)
         {

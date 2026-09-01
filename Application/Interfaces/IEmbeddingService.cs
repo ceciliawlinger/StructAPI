@@ -1,6 +1,6 @@
 ﻿using Pgvector;
 
-namespace StructAPI.Service.IA
+namespace StructAPI.Application.Interfaces
 {
     public interface IEmbeddingService
     {

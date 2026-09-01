@@ -8,27 +8,26 @@ using StructAPI.Application.Interfaces;
 using StructAPI.Domain.Entities;
 using StructAPI.Domain.Enums;
 using StructAPI.Domain.Exceptions;
-using StructAPI.Service.IA;
-using StructAPI.Service.Suggestions.Analysis;
+using StructAPI.Domain.Services;
 
 namespace StructAPI.Service.Knowledge
 {
     public class KnowledgeEntryService
     {
         private readonly IKnowledgeEntryRepository _repository;
-        private readonly SemanticMatchService _matchService;
         private readonly IEmbeddingService _embeddingService;
+        private readonly SemanticClassifier _classifier;
 
-        public KnowledgeEntryService(IKnowledgeEntryRepository repository, SemanticMatchService matchService, IEmbeddingService embeddingService)
+        public KnowledgeEntryService(IKnowledgeEntryRepository repository, IEmbeddingService embeddingService, SemanticClassifier classifier)
         {
             if (repository == null) throw new ArgumentNullException("Repository cannot be null");
             _repository = repository;
 
-            if (matchService == null) throw new ArgumentNullException("Match service cannot be null");
-            _matchService = matchService;
-
             if (embeddingService == null) throw new ArgumentNullException("Embedding service cannot be null");
             _embeddingService = embeddingService;
+
+            if (classifier == null) throw new ArgumentNullException("Classifier cannot be null");
+            _classifier = classifier;
 
         }
         public async Task<KnowledgeEntryResponse> CreateKnowledgeEntry(CreateKnowledgeEntryRequest request) 
@@ -40,9 +39,8 @@ namespace StructAPI.Service.Knowledge
             if (embedding == null)
                 throw new DomainException("Failed to generate embedding for the content.");
             KnowledgeEntry entry = new KnowledgeEntry(request.Content, request.User, embedding);
-            var matches = await _matchService.FindSemanticMatchesAsync(embedding);
 
-            if (matches.Any(x => x.Analysis.IsRedundant))
+            if (await IsDuplicity(embedding))
                 throw new DuplicateKnowledgeEntryException();
 
             await _repository.CreateAsync(entry);
@@ -60,13 +58,11 @@ namespace StructAPI.Service.Knowledge
             if (embedding == null)
                 throw new DomainException("Failed to generate embedding for the content.");
 
-            var matches = await _matchService.FindSemanticMatchesAsync(embedding);
-
-            if (matches.Any(x => x.Analysis.IsRedundant))
+            var matches = await _repository.FindSimilarAsync(embedding, 5);
+            if (await IsDuplicity(embedding, matches))
                 throw new DuplicateKnowledgeEntryException();
-
             matches = matches.Where(x => x.Entry.Id != request.OldEntryID).ToList();
-            
+
             var newEntry = KnowledgeEntry.CreateReplacement( // Always create a new one and deprecate the old one.
                  request.Content,
                  request.User,
@@ -78,6 +74,13 @@ namespace StructAPI.Service.Knowledge
             await _repository.CreateAsync(newEntry);
             await _repository.UpdateStatusAsync(existingEntry);
             return new KnowledgeEntryResponse(newEntry);
+        }
+
+        private async Task<bool> IsDuplicity(float[] embedding, List<SemanticMatch> matches = null)
+        {
+            if (matches == null)
+                matches = await _repository.FindSimilarAsync(embedding, 5);
+            return matches.Any(x => _classifier.Classify(x.Similarity) == KnowledgeRelationType.Redundant);
         }
             
         public async Task DeleteKnowledgeEntry(Guid entryId) 
